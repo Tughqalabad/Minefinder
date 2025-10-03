@@ -9,6 +9,7 @@
     .topbar {
       display:flex; justify-content:center; align-items:center;
       background:#808080; border:4px solid #7b7b7b; padding:6px; margin-bottom:8px;
+      gap:10px;
     }
     #restart {
       font-size:22px; width:40px; height:40px;
@@ -16,6 +17,7 @@
       cursor:pointer; border-radius:4px;
     }
     #restart:hover { background:#dcdcdc; }
+    select { font-size:16px; padding:4px; }
     .board { display:grid; border:4px solid #808080; background:#808080; margin:0 auto; }
     .cell {
       width:28px; height:28px; border:2px solid; border-color:#fff #7b7b7b #7b7b7b #fff;
@@ -23,11 +25,7 @@
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; user-select:none;
     }
-    .cell.revealed {
-      border:1px solid #7b7b7b;
-      background:#dcdcdc;
-      cursor:default;
-    }
+    .cell.revealed { border:1px solid #7b7b7b; background:#dcdcdc; cursor:default; }
     .cell.mine { background:#ff4d4d; }
     .cell.flag { background:#c0c0c0; color:red; }
     .cell.number-1 { color:blue; }
@@ -43,6 +41,11 @@
 <body>
 <div id="game">
   <div class="topbar">
+    <select id="difficulty">
+      <option value="easy">Homeless (Easy)</option>
+      <option value="medium">Traveller (Medium)</option>
+      <option value="hard">Conqueror (Hard)</option>
+    </select>
     <button id="restart">😊</button>
   </div>
   <div id="board" class="board"></div>
@@ -51,11 +54,22 @@
 <script>
 const boardEl = document.getElementById('board');
 const restartBtn = document.getElementById('restart');
+const difficultyEl = document.getElementById('difficulty');
+
 let ROWS = 16, COLS = 16, MINES = 40;
 let grid = [];
 let started = false, gameOver = false;
 
+function setDifficulty(mode){
+  switch(mode){
+    case 'easy': ROWS=9; COLS=9; MINES=10; break;
+    case 'medium': ROWS=16; COLS=16; MINES=40; break;
+    case 'hard': ROWS=24; COLS=24; MINES=99; break;
+  }
+}
+
 function init(){
+  setDifficulty(difficultyEl.value);
   boardEl.style.gridTemplateColumns = `repeat(${COLS}, auto)`;
   grid = []; boardEl.innerHTML = ''; gameOver = false; started = false;
   restartBtn.textContent = "😊";
@@ -68,9 +82,7 @@ function init(){
       el.className = 'cell';
       el.addEventListener('click', ()=>leftClick(cell));
       el.addEventListener('contextmenu', e=>{e.preventDefault();rightClick(cell);});
-      el.addEventListener('mousedown', e=>{
-        if(e.button===1) { e.preventDefault(); middleClick(cell); }
-      });
+      el.addEventListener('mousedown', e=>{ if(e.button===1) { e.preventDefault(); middleClick(cell); } });
       cell.el = el;
       grid[r][c] = cell;
       boardEl.appendChild(el);
@@ -160,7 +172,9 @@ function endGame(win){
 }
 
 restartBtn.addEventListener('click', ()=>init());
+difficultyEl.addEventListener('change', ()=>init());
 init();
 </script>
 </body>
 </html>
+
